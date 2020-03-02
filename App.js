@@ -3,6 +3,8 @@ import { View } from 'react-native';
 import { NativeRouter, Route, Redirect, Switch } from "react-router-native";
 import Login from './component/login';
 import Lobby from './component/lobby';
+import GeneralHOC from './component/hoc/general';
+const GeneralHOCView = GeneralHOC(View);
 // import PrivateRoute from './component/hoc/privateRoute';
 
 export default class App extends React.Component {
@@ -121,10 +123,14 @@ export default class App extends React.Component {
           <Redirect to={targetPage} />
             <Switch>
               <Route exact path="/">
-                <Login isLoading={isLoading} ws={ws} handleLoadingState={this.handleLoadingState} />
+                <GeneralHOCView isLoading={isLoading}>
+                  <Login ws={ws} handleLoadingState={this.handleLoadingState} />
+                </GeneralHOCView>
               </Route>
               <PrivateRoute path="/lobby" isAuthenticated={isAuthenticated}>
-                <Lobby userId={userId} token={token} ws={ws} room={room} isLoading={isLoading}/>
+                <GeneralHOCView isLoading={isLoading}>
+                  <Lobby userId={userId} token={token} ws={ws} room={room}/>
+                </GeneralHOCView>
               </PrivateRoute>
             </Switch>
         </NativeRouter>

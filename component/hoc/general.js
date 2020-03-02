@@ -2,10 +2,12 @@ import React from 'react';
 import { View, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from 'react-native';
 
 export default Comp => {
-  return ({ isLoading, ...props }) => (
-    <View style={styles.container}>
+  return ({ isLoading, children }) => (
+    <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false} >
-        <Comp style={styles.container} {...props} />
+        <Comp style={styles.container}>
+          {children}
+        </Comp>
       </TouchableWithoutFeedback>
       {isLoading && (
         <View
@@ -17,7 +19,7 @@ export default Comp => {
           <ActivityIndicator size="large" />
         </View>
       )}
-    </View>
+    </>
   );
 };
 

@@ -1,7 +1,6 @@
 import React from 'react';
-import { TouchableWithoutFeedback, Keyboard, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Input from './input';
-import GeneralHOC from './hoc/general';
 
 class Login extends React.Component {
   constructor(props) {
@@ -175,4 +174,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default GeneralHOC(Login);
+export default Login;
