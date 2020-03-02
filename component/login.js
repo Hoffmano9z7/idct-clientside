@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableWithoutFeedback, Keyboard, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Input from './input';
 
-export default class Login extends React.Component {
+class Login extends React.Component {
   state = {
     id: '',
     pw: '',
@@ -19,6 +19,7 @@ export default class Login extends React.Component {
   }
 
   authRequest = event => {
+    this.props.handleLoadingState(true);
     const { id, pw, isUidValid, isPwdValid } = this.state;
     const checkValidList = [isUidValid, isPwdValid];
     for (const check of checkValidList) {
@@ -40,10 +41,9 @@ export default class Login extends React.Component {
 
   render() {
     const { isUidValid, isPwdValid } = this.state;
-
+    // TODO: Hoffman - make the TouchableWithoutFeedback as a HOC
     return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.container}>
+        <>
           <Text style={styles.logo}>Tic Tac Toe</Text>
           <View style={styles.inputView} >
             <Input
@@ -115,19 +115,12 @@ export default class Login extends React.Component {
           <TouchableOpacity onPress={this.postRegister}>
             <Text style={styles.loginText}>Signup</Text>
           </TouchableOpacity>
-        </View>
-      </TouchableWithoutFeedback>
+        </>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#003f5c',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   logo: {
     fontWeight: "bold",
     fontSize: 50,
@@ -170,3 +163,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   }
 });
+
+export default Login;
