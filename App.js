@@ -3,10 +3,7 @@ import { View } from 'react-native';
 import { NativeRouter, Route, Redirect, Switch } from "react-router-native";
 import Login from './component/login';
 import Lobby from './component/lobby';
-import Snackbar from 'react-native-snackbar';
 // import PrivateRoute from './component/hoc/privateRoute';
-import GeneralHOC from './component/hoc/general';
-const GeneralHOCView = GeneralHOC(View);
 
 export default class App extends React.Component {
 
@@ -38,7 +35,7 @@ export default class App extends React.Component {
   handleLoadingState = isLoading => this.setState({ ...this.state, isLoading});
 
   handleWebSocket = () => {
-    let ws = new WebSocket('ws://idct.herokuapp.com/');
+    let ws = new WebSocket('ws://localhost:5000');
     ws.onopen = () => {
       console.log('Connected to the ws server.');
       this.setState({
@@ -99,7 +96,7 @@ export default class App extends React.Component {
         });
       }
     }
-    ws.onclose = e => {
+    ws.onclose = _ => {
       this.setState({
         ...this.state,
         error: {
@@ -110,14 +107,11 @@ export default class App extends React.Component {
         }
       });
     }
+    ws.onerror = e => console.log(`WebSocket Error: ${e.reason}`);
   }
 
   componentDidMount() {
     this.handleWebSocket();
-    Snackbar.show({
-      text: 'Hello world',
-      duration: Snackbar.LENGTH_SHORT,
-    });
   }
 
   render() {
@@ -127,14 +121,10 @@ export default class App extends React.Component {
           <Redirect to={targetPage} />
             <Switch>
               <Route exact path="/">
-                <GeneralHOCView isLoading={isLoading}>
-                  <Login ws={ws} handleLoadingState={this.handleLoadingState} />
-                </GeneralHOCView>
+                <Login isLoading={isLoading} ws={ws} handleLoadingState={this.handleLoadingState} />
               </Route>
               <PrivateRoute path="/lobby" isAuthenticated={isAuthenticated}>
-                <GeneralHOCView isLoading={isLoading}>
-                  <Lobby userId={userId} token={token} ws={ws} room={room} />
-                </GeneralHOCView>
+                <Lobby userId={userId} token={token} ws={ws} room={room} isLoading={isLoading}/>
               </PrivateRoute>
             </Switch>
         </NativeRouter>

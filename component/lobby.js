@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View, Text } from 'react-native';
+import BottomBar from './bottomBar';
 
 export default class Lobby extends React.Component {
 
@@ -8,6 +9,10 @@ export default class Lobby extends React.Component {
 
     this.state = {
       room: [],
+      navigation: {
+        index: 0,
+
+      }
     };
   }
 
@@ -45,6 +50,7 @@ export default class Lobby extends React.Component {
     const { room } = this.state;
     return (
       <View>
+        <BottomBar />
         <Text>Wellcome, {userId} </Text>
       </View>
     )

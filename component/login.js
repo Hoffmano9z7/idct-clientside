@@ -1,14 +1,20 @@
 import React from 'react';
 import { TouchableWithoutFeedback, Keyboard, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Input from './input';
+import GeneralHOC from './hoc/general';
 
 class Login extends React.Component {
-  state = {
-    id: '',
-    pw: '',
-    isUidValid: null,
-    isPwdValid: null,
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      id: '',
+      pw: '',
+      isUidValid: null,
+      isPwdValid: null,
+    }
   }
+  
 
   postLogin = () => {
     this.authRequest('login');
@@ -169,4 +175,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Login;
+export default GeneralHOC(Login);
