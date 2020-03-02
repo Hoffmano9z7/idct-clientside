@@ -4,7 +4,7 @@ import { View, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Keyboard
 export default Comp => {
   return ({ isLoading, children, ...props }) => (
     <>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false} >
         <Comp style={styles.container} {...props}>
           {children}
         </Comp>

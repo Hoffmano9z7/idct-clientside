@@ -1,4 +1,5 @@
 import React from 'react';
+import { Route, Redirect } from "react-router-native";
 export default class PrivateRoute extends React.Component {
 
   constructor(props) {
@@ -26,3 +27,5 @@ export default class PrivateRoute extends React.Component {
     );
   }
 }
+
+//FIXME: Hoffman - not working

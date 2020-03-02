@@ -3,7 +3,8 @@ import { View } from 'react-native';
 import { NativeRouter, Route, Redirect, Switch } from "react-router-native";
 import Login from './component/login';
 import Lobby from './component/lobby';
-import PrivateRoute from './component/hoc/privateRoute';
+import Snackbar from 'react-native-snackbar';
+// import PrivateRoute from './component/hoc/privateRoute';
 import GeneralHOC from './component/hoc/general';
 const GeneralHOCView = GeneralHOC(View);
 
@@ -34,7 +35,7 @@ export default class App extends React.Component {
     });
   }
 
-  handleLoadingState = _ => this.setState({ ...this.state, isLoading: true});
+  handleLoadingState = isLoading => this.setState({ ...this.state, isLoading});
 
   handleWebSocket = () => {
     let ws = new WebSocket('ws://idct.herokuapp.com/');
@@ -113,6 +114,10 @@ export default class App extends React.Component {
 
   componentDidMount() {
     this.handleWebSocket();
+    Snackbar.show({
+      text: 'Hello world',
+      duration: Snackbar.LENGTH_SHORT,
+    });
   }
 
   render() {
@@ -127,10 +132,40 @@ export default class App extends React.Component {
                 </GeneralHOCView>
               </Route>
               <PrivateRoute path="/lobby" isAuthenticated={isAuthenticated}>
-                <Lobby userId={userId} token={token} ws={ws} room={room} />
+                <GeneralHOCView isLoading={isLoading}>
+                  <Lobby userId={userId} token={token} ws={ws} room={room} />
+                </GeneralHOCView>
               </PrivateRoute>
             </Switch>
         </NativeRouter>
+    );
+  }
+}
+
+class PrivateRoute extends React.Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { children, ...rest } = this.props;
+    return (
+      <Route
+        {...rest}
+        render={({ location }) =>
+          this.props.isAuthenticated ? (
+            children
+          ) : (
+              <Redirect
+                to={{
+                  pathname: "/",
+                  state: { from: location }
+                }}
+              />
+            )
+        }
+      />
     );
   }
 }

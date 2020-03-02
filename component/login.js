@@ -27,9 +27,14 @@ class Login extends React.Component {
         for (const isValid of check) {
           if (!isValid) {
             console.log('invalid')
+            this.props.handleLoadingState(false);
             return;
           }
         }
+      } else {
+        console.log('invalid')
+        this.props.handleLoadingState(false);
+        return;
       }
     }
     this.props.ws.send(JSON.stringify({
@@ -43,79 +48,79 @@ class Login extends React.Component {
     const { isUidValid, isPwdValid } = this.state;
     // TODO: Hoffman - make the TouchableWithoutFeedback as a HOC
     return (
-        <>
-          <Text style={styles.logo}>Tic Tac Toe</Text>
-          <View style={styles.inputView} >
-            <Input
-              style={styles.inputText}
-              placeholder="User ID"
-              placeholderTextColor="#003f5c"
-              pattern={[
-                '^.{8,15}$', // min 8, max 12 chars
-                '[A-Za-z]', // uppercase letter
-              ]}
-              onValidation={isUidValid => this.setState({ isUidValid })}
-              onChangeText={id => this.setState({ id })} />
-          </View>
-          <View style={styles.inputView} >
-            <Input
-              secureTextEntry
-              style={styles.inputText}
-              placeholder="Password..."
-              placeholderTextColor="#003f5c"
-              pattern={[
-                '^.{8,15}$', // min 8, max 15 chars
-                '(?=.*\\d)', // number required
-                '(?=.*[A-Z])', // uppercase letter
-              ]}
-              onValidation={isPwdValid => this.setState({ isPwdValid })}
-              onChangeText={pw => this.setState({ pw })} />
-          </View>
-          <View>
-            {!!isUidValid && (
-              <View>
-                {!(isUidValid[0] && isUidValid[1]) && (
-                  <Text style={styles.text}>
-                    Invalid User ID:
-                </Text>
-                )}
-                {!isUidValid[0] && (
-                  <Text style={{ color: 'red' }}>
-                    Only allow 8 - 12 characters
-                </Text>
-                )}
-                {!isUidValid[1] && (
-                  <Text style={{ color: 'red' }}>
-                    No numeric or special characters is allowed
-                </Text>
-                )}
-              </View>
-            )}
+      <>
+        <Text style={styles.logo}>Tic Tac Toe</Text>
+        <View style={styles.inputView} >
+          <Input
+            style={styles.inputText}
+            placeholder="User ID"
+            placeholderTextColor="#003f5c"
+            pattern={[
+              '^.{8,15}$', // min 8, max 12 chars
+              '[A-Za-z]', // uppercase letter
+            ]}
+            onValidation={isUidValid => this.setState({ isUidValid })}
+            onChangeText={id => this.setState({ id })} />
+        </View>
+        <View style={styles.inputView} >
+          <Input
+            secureTextEntry
+            style={styles.inputText}
+            placeholder="Password..."
+            placeholderTextColor="#003f5c"
+            pattern={[
+              '^.{8,15}$', // min 8, max 15 chars
+              '(?=.*\\d)', // number required
+              '(?=.*[A-Z])', // uppercase letter
+            ]}
+            onValidation={isPwdValid => this.setState({ isPwdValid })}
+            onChangeText={pw => this.setState({ pw })} />
+        </View>
+        <View>
+          {!!isUidValid && (
             <View>
-              <Text style={styles.text}>
-                Password Policy:
-            </Text>
-              <Text style={{ color: isPwdValid && isPwdValid[0] ? 'green' : 'red' }}>
-                Rule 1: length between 8 - 15 characters
-            </Text>
-              <Text style={{ color: isPwdValid && isPwdValid[1] ? 'green' : 'red' }}>
-                Rule 2: number required
-            </Text>
-              <Text style={{ color: isPwdValid && isPwdValid[2] ? 'green' : 'red' }}>
-                Rule 3: uppercase letter
-            </Text>
+              {!(isUidValid[0] && isUidValid[1]) && (
+                <Text style={styles.text}>
+                  Invalid User ID:
+                </Text>
+              )}
+              {!isUidValid[0] && (
+                <Text style={{ color: 'red' }}>
+                  Only allow 8 - 12 characters
+                </Text>
+              )}
+              {!isUidValid[1] && (
+                <Text style={{ color: 'red' }}>
+                  No numeric or special characters is allowed
+                </Text>
+              )}
             </View>
+          )}
+          <View>
+            <Text style={styles.text}>
+              Password Policy:
+            </Text>
+            <Text style={{ color: isPwdValid && isPwdValid[0] ? 'green' : 'red' }}>
+              Rule 1: length between 8 - 15 characters
+            </Text>
+            <Text style={{ color: isPwdValid && isPwdValid[1] ? 'green' : 'red' }}>
+              Rule 2: number required
+            </Text>
+            <Text style={{ color: isPwdValid && isPwdValid[2] ? 'green' : 'red' }}>
+              Rule 3: uppercase letter
+            </Text>
           </View>
-          {/* <TouchableOpacity>
+        </View>
+        {/* <TouchableOpacity>
             <Text style={styles.forgot}>Forgot Password?</Text>
           </TouchableOpacity> */}
-          <TouchableOpacity onPress={this.postLogin} style={styles.loginBtn}>
-            <Text style={styles.loginText}>LOGIN</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.postRegister}>
-            <Text style={styles.loginText}>Signup</Text>
-          </TouchableOpacity>
-        </>
+        <TouchableOpacity onPress={this.postLogin} style={styles.loginBtn}>
+          <Text style={styles.loginText}>LOGIN</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={this.postRegister}>
+          <Text style={styles.loginText}>Signup</Text>
+        </TouchableOpacity>
+      </>
     );
   }
 }
