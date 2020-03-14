@@ -51,7 +51,6 @@ class Login extends React.Component {
 
   render() {
     const { isUidValid, isPwdValid } = this.state;
-    // TODO: Hoffman - make the TouchableWithoutFeedback as a HOC
     return (
       <>
         <Text style={styles.logo}>Tic Tac Toe</Text>
@@ -62,7 +61,7 @@ class Login extends React.Component {
             placeholderTextColor="#003f5c"
             pattern={[
               '^.{8,15}$', // min 8, max 12 chars
-              '[A-Za-z]', // uppercase letter
+              '^[a-zA-Z0-9]*$', // uppercase letter
             ]}
             onValidation={isUidValid => this.setState({ isUidValid })}
             onChangeText={id => this.setState({ id })} />

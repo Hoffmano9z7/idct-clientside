@@ -1,6 +1,10 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import BottomBar from './bottomBar';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Card, Title, Paragraph } from 'react-native-paper';
+import HeadAppBar from './headAppBar';
+import { Asset } from 'expo-asset';
+// import GeneralHOC from './hoc/general';
+// const GeneralHOCView = GeneralHOC(View);
 
 export default class Lobby extends React.Component {
 
@@ -9,10 +13,6 @@ export default class Lobby extends React.Component {
 
     this.state = {
       room: [],
-      navigation: {
-        index: 0,
-
-      }
     };
   }
 
@@ -36,7 +36,7 @@ export default class Lobby extends React.Component {
     }));
   }
 
-  handleEnterRoom = roomNum => {
+  enterRoom = roomNum => {
     const { token, ws } = this.props;
     ws.send(JSON.stringify({
       event: "enterRoom",
@@ -46,13 +46,60 @@ export default class Lobby extends React.Component {
   }
 
   render() {
-    const { userId } = this.props;
+    const { userId, isLoading, handleManualRedirect } = this.props;
     const { room } = this.state;
+    const content = room.map((info, index) => {
+      let players = [];
+      if (!!info && info.a.id)
+        players.push(info.a.id);
+      if (!!info && info.b.id)
+        players.push(info.b.id);
+      return (
+        <Card key={"room" + index} style={styles.card}>
+          <Card.Content>
+            <Title style={styles.text}>Room {index + 1}</Title>
+            <Paragraph style={styles.text}>Players: {players.join(", ")}</Paragraph>
+          </Card.Content>
+          <Card.Cover style={styles.coverHeight} source={{uri: Asset.fromModule(require('../assets/tictactoe.png')).uri}} />
+          <Card.Actions>
+            <Button type="outlined" onPress={ () => this.enterRoom(index)} style={styles.text}>Enter</Button>
+          </Card.Actions>
+        </Card>
+      )
+    });
     return (
-      <View>
-        <BottomBar />
-        <Text>Wellcome, {userId} </Text>
+      <View style={styles.background}>
+        <HeadAppBar title="Lobby" sub={`Welcome, ${userId}`} callback={() => handleManualRedirect("/")}/>
+        {/* <GeneralHOCView isLoading={isLoading}> */}
+          <ScrollView contentContainerStyle={styles.container}>
+            {content}
+          </ScrollView>
+        {/* </GeneralHOCView> */}
       </View>
     )
   }
 }
+
+
+const styles = StyleSheet.create({
+  background: {
+    backgroundColor: '#003f5c',
+  },
+  container: {
+    backgroundColor: '#003f5c',
+    alignItems: 'center',
+    minHeight: 1500,
+  },
+  card: {
+    backgroundColor: "#14bdac",
+    width: "95%",
+    margin: 5,
+    height: 450, 
+  },
+  text: {
+    color: "#003f5c",
+  },
+  coverHeight: {
+    height: 300, 
+  }
+});

@@ -8,6 +8,8 @@ export default Comp => {
         <Comp style={styles.container}>
           {children}
         </Comp>
+
+
       </TouchableWithoutFeedback>
       {isLoading && (
         <View

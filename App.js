@@ -1,8 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
 import { NativeRouter, Route, Redirect, Switch } from "react-router-native";
+import { Banner } from 'react-native-paper';
 import Login from './component/login';
 import Lobby from './component/lobby';
+import Room from './component/room';
+import Game from './component/hoc/game';
 import GeneralHOC from './component/hoc/general';
 const GeneralHOCView = GeneralHOC(View);
 // import PrivateRoute from './component/hoc/privateRoute';
@@ -12,6 +15,12 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
 
+    const playerSchma = {
+      id: '',
+      isReady: false,
+      isMovable: false,
+      moves: [[0,0,0],[0,0,0],[0,0,0]],
+    }
     this.state = {
       ws: null,
       isLoading: false,
@@ -25,6 +34,14 @@ export default class App extends React.Component {
       },
       userId: '',
       room: [],
+      roomNum: 0,
+      roomInfo: {
+        a: { ...playerSchma },
+        b: { ...playerSchma },
+        s: [],
+        isPlaying: false,
+      },
+      lastChess: '',
     };
   }
 
@@ -36,8 +53,10 @@ export default class App extends React.Component {
 
   handleLoadingState = isLoading => this.setState({ ...this.state, isLoading});
 
+  handleManualRedirect = targetPage => this.setState({ ...this.state, targetPage});
+
   handleWebSocket = () => {
-    let ws = new WebSocket('ws://localhost:5000');
+    let ws = new WebSocket('wss://idct.herokuapp.com');
     ws.onopen = () => {
       console.log('Connected to the ws server.');
       this.setState({
@@ -47,6 +66,8 @@ export default class App extends React.Component {
     }
     ws.onmessage = e => {
       const data = JSON.parse(e.data);
+      if (data.action)
+        console.log(data.action);
       if ('error' === data.status || 'warning' === data.status) {
         this.setState({
           ...this.state,
@@ -84,12 +105,40 @@ export default class App extends React.Component {
           }
         });
       } else if ('enterRoom' === data.action) {
+        let newRoom = {...this.state.room};
+        newRoom[roomNum] = data.roomInfo;
         this.setState({
           ...this.state,
           isLoading: false,
           targetPage: '/room',
+          roomNum: data.roomNum,
+          token: data.token,
+          roomInfo: data.roomInfo, 
+          error: {
+            isErr: false,
+            type: 'success',
+            msg: '',
+          }
+        });
+      } else if ('exitRoom' === data.action) {
+        this.setState({
+          ...this.state,
+          isLoading: false,
+          targetPage: '/lobby',
           token: data.token,
           room: data.room,
+          error: {
+            isErr: false,
+            type: 'success',
+            msg: '',
+          }
+        });
+      } else if ('updateGame' === data.action) {
+        this.setState({
+          ...this.state,
+          isLoading: false,
+          token: data.token,
+          roomInfo,
           error: {
             isErr: false,
             type: 'success',
@@ -101,8 +150,8 @@ export default class App extends React.Component {
     ws.onclose = _ => {
       this.setState({
         ...this.state,
+        isLoading: false,
         error: {
-          isLoading: false,
           isErr: true,
           type: 'info',
           msg: 'You have been disconneted.',
@@ -117,23 +166,63 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { targetPage, error, ws, token, room, userId, isAuthenticated, isLoading } = this.state;
+    const { targetPage, error, ws, token, room, userId, isAuthenticated, isLoading, roomNum, roomInfo, lastChess } = this.state;
     return (
-        <NativeRouter>
-          <Redirect to={targetPage} />
-            <Switch>
-              <Route exact path="/">
-                <GeneralHOCView isLoading={isLoading}>
-                  <Login ws={ws} handleLoadingState={this.handleLoadingState} />
-                </GeneralHOCView>
-              </Route>
-              <PrivateRoute path="/lobby" isAuthenticated={isAuthenticated}>
-                <GeneralHOCView isLoading={isLoading}>
-                  <Lobby userId={userId} token={token} ws={ws} room={room}/>
-                </GeneralHOCView>
-              </PrivateRoute>
-            </Switch>
-        </NativeRouter>
+        <>
+          <NativeRouter>
+            <Redirect to={{
+              pathname: targetPage,
+              state: { from: this.props.location }
+            }} />
+              <Switch>
+                <Route exact path="/">
+                  <GeneralHOCView isLoading={isLoading}>
+                    <Login ws={ws} handleLoadingState={this.handleLoadingState} />
+                  </GeneralHOCView>
+                </Route>
+                <PrivateRoute path="/lobby" isAuthenticated={isAuthenticated}>
+                  <Lobby userId={userId} token={token} ws={ws} room={room} isLoading={isLoading} handleManualRedirect={this.handleManualRedirect} />
+                </PrivateRoute>
+                <PrivateRoute path="/room" isAuthenticated={isAuthenticated}>
+                    <Room 
+                      userId={userId} 
+                      token={token} ws={ws} 
+                      room={room}
+                      roomNum={roomNum} 
+                      isLoading={isLoading} 
+                      handleManualRedirect={this.handleManualRedirect}
+                      />
+                </PrivateRoute>
+                <PrivateRoute path="/game" isAuthenticated={isAuthenticated}>
+                  <Game userId={userId} chess={lastChess}
+                    token={token} ws={ws} 
+                    roomInfo={roomInfo} token={token}
+                  />
+                  {/* <Game userId={userId} 
+                      token={token} ws={ws} 
+                      roomInfo={roomInfo} token={token}/> */}
+                </PrivateRoute>
+              </Switch>
+          </NativeRouter>
+          <Banner
+            visible={error.isErr}
+            actions={[
+              {
+                label: 'Close',
+                onPress: () => this.setState({
+                  ...this.state,
+                  error: {
+                    isErr: false,
+                    type: 'success',
+                    msg: '',
+                  }
+                }),
+              }
+            ]}
+          >
+            {error.msg}
+          </Banner>
+        </>
     );
   }
 }
