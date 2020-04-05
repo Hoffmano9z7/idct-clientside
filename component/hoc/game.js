@@ -10,18 +10,20 @@ export default class Game extends React.Component {
   }
 
   render() {
-    const { roomInfo, chess, token, ws, roomNum } = this.props;
+    const { roomInfo, token, ws, roomNum, userId } = this.props;
     const moves = {
       a: roomInfo.a.moves,
-      b: roomInfo.b.moves
+      b: roomInfo.b.moves,
     }
+    const chess = roomInfo.a.id === userId ? 'a' : 'b';
     return (
       <GameBoard 
-        isMovable={true}
+        isMovable={roomInfo[chess].isMovable}
         ws={ws}
         roomNum={roomNum}
-      //isMovable={roomInfo[chess].isMovable} 
-        moves={moves} token={token} />
+        moves={moves} token={token} 
+        chess={chess}
+        />
     )
   }
 }

@@ -33,13 +33,13 @@ export default class App extends React.Component {
         msg: '',
       },
       userId: '',
-      room: [],
       roomNum: 0,
       roomInfo: {
         a: { ...playerSchma },
         b: { ...playerSchma },
         s: [],
         isPlaying: false,
+        showWinner: false,
       },
       lastChess: '',
     };
@@ -96,8 +96,8 @@ export default class App extends React.Component {
         this.setState({
           ...this.state,
           isLoading: false,
-          token: data.token,
-          room: data.room,
+          // token: data.token,
+          roomInfo: data.roomInfo, 
           error: {
             isErr: false,
             type: 'success',
@@ -105,14 +105,14 @@ export default class App extends React.Component {
           }
         });
       } else if ('enterRoom' === data.action) {
-        let newRoom = {...this.state.room};
-        newRoom[roomNum] = data.roomInfo;
+        // let newRoom = {...this.state.room};
+        // newRoom[0] = data.roomInfo; //FIXME: Hard code 
         this.setState({
           ...this.state,
           isLoading: false,
           targetPage: '/room',
-          roomNum: data.roomNum,
-          token: data.token,
+          roomNum: 0,  //FIXME: Hard code - data.roomNum,
+          // token: data.token,
           roomInfo: data.roomInfo, 
           error: {
             isErr: false,
@@ -125,8 +125,9 @@ export default class App extends React.Component {
           ...this.state,
           isLoading: false,
           targetPage: '/lobby',
-          token: data.token,
-          room: data.room,
+          // token: data.token,
+          // room: data.room,
+          roomInfo: data.roomInfo,
           error: {
             isErr: false,
             type: 'success',
@@ -137,14 +138,46 @@ export default class App extends React.Component {
         this.setState({
           ...this.state,
           isLoading: false,
-          token: data.token,
-          roomInfo,
+          // token: data.token,
+          // room,
+          roomInfo: data.roomInfo,
           error: {
             isErr: false,
             type: 'success',
             msg: '',
           }
         });
+      } else if ('startGame' === data.action) {
+        this.setState({
+          ...this.state,
+          isLoading: false,
+          targetPage: '/game',
+          // token: data.token,
+          roomInfo: data.roomInfo,
+          error: {
+            isErr: false,
+            type: 'success',
+            msg: '',
+          }
+        });
+      } else if ('endGame' === data.action) {
+        this.setState({
+          ...this.state,
+          isLoading: false,
+          // token: data.token,
+          roomInfo: data.roomInfo,
+          error: {
+            isErr: true,
+            type: 'success',
+            msg: `The winner is ${data.winner}`,
+          }
+        });
+        // setTimeout( _ => {
+        //   this.setState({
+        //     ...this.state,
+        //     targetPage: '/lobby',
+        //   });
+        // }, 3000);
       }
     }
     ws.onclose = _ => {
@@ -166,7 +199,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { targetPage, error, ws, token, room, userId, isAuthenticated, isLoading, roomNum, roomInfo, lastChess } = this.state;
+    const { targetPage, error, ws, token, room, userId, isAuthenticated, isLoading, roomInfo, lastChess } = this.state;
     return (
         <>
           <NativeRouter>
@@ -181,22 +214,22 @@ export default class App extends React.Component {
                   </GeneralHOCView>
                 </Route>
                 <PrivateRoute path="/lobby" isAuthenticated={isAuthenticated}>
-                  <Lobby userId={userId} token={token} ws={ws} room={room} isLoading={isLoading} handleManualRedirect={this.handleManualRedirect} />
+                  <Lobby userId={userId} token={token} ws={ws} isLoading={isLoading} handleManualRedirect={this.handleManualRedirect} />
                 </PrivateRoute>
                 <PrivateRoute path="/room" isAuthenticated={isAuthenticated}>
                     <Room 
                       userId={userId} 
                       token={token} ws={ws} 
-                      room={room}
-                      roomNum={roomNum} 
+                      roomInfo={roomInfo}
+                      // room={room}
+                      roomNum={0} //FIXME: Hard code
                       isLoading={isLoading} 
                       handleManualRedirect={this.handleManualRedirect}
                       />
                 </PrivateRoute>
                 <PrivateRoute path="/game" isAuthenticated={isAuthenticated}>
-                  <Game userId={userId} chess={lastChess}
-                    token={token} ws={ws} 
-                    roomInfo={roomInfo} token={token}
+                  <Game userId={userId} lastChess={lastChess}
+                    token={token} ws={ws} roomInfo={roomInfo} token={token}
                   />
                   {/* <Game userId={userId} 
                       token={token} ws={ws} 

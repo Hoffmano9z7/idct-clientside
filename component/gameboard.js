@@ -14,6 +14,8 @@ export default class GameBoard extends React.Component {
         a: [[0,0,0],[0,0,0],[0,0,0]],
         b: [[0,0,0],[0,0,0],[0,0,0]],
       },
+      chess: '',
+      showWinner: false,
     }
   }
 
@@ -25,41 +27,40 @@ export default class GameBoard extends React.Component {
     if (props.moves !== state.moves)
       result.moves = props.moves;
     
+    if (props.chess !== state.chess)
+      result.chess = props.chess;
+    
     if (Object.keys(result).length > 0)
       return result;
     return null;
   }
 
   handleMove = coor => {
-    const { chess, roomNum } = this.props
-    const { moves, isMovable } = this.state;
+    const { moves, isMovable, chess } = this.state;
     if ( isMovable && checkMoveValidation(moves[chess], coor)) {
       const { token, ws } = this.props;
       ws.send(JSON.stringify({
         event: "move",
         move: coor,
-        roomNum,
         token
       }));
     }
   }
 
-  exitGame = roomNum => {
+  exitGame = _ => {
     const { token, ws } = this.props;
     ws.send(JSON.stringify({
       event: "exitGame",
-      roomNum,
       token
     }));
   }
 
   render() {
-    const { moves } = this.state;
-    const { roomNum } = this.props;
+    const { moves, isMovable } = this.state;
     const board = [[0,0,0],[0,0,0],[0,0,0]];
     return (
       <>
-        <HeadAppBar title="Gameboard" callback={() => this.exitGame(roomNum)}/>
+        <HeadAppBar title="Gameboard" callback={() => this.exitGame()}/>
         <View style={styles.container}>
           <Paragraph style={styles.text}>dasdas</Paragraph>
           <Grid>        
@@ -72,7 +73,8 @@ export default class GameBoard extends React.Component {
                       return (
                         <Col style={styles.centualize}>
                           <IconButton 
-                            icon={ moves.a[rInx][cInx] === 1 ? "close-box" : moves.b[rInx][cInx] === 1 ? "checkbox-blank-circle-outline" : "" } 
+                            disabled={!isMovable || !!moves.a[rInx][cInx] || !!moves.b[rInx][cInx]}
+                            icon={ !!moves.a[rInx][cInx] ? "close-box" : !!moves.b[rInx][cInx] ? "checkbox-blank-circle-outline" : "" } 
                             style={styles.box, styles.backgroundNormal}
                             onPress={() => this.handleMove([rInx, cInx])}
                             size={70}

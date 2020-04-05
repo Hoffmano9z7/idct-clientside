@@ -1,14 +1,25 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Card, Title, Paragraph } from 'react-native-paper';
+import { StyleSheet, View, Text } from 'react-native';
+import { Button, } from 'react-native-paper';
 import HeadAppBar from './headAppBar';
 
 export default class Room extends React.Component {
   constructor(props) {
     super(props);
+    const playerSchma = {
+      id: '',
+      isReady: false,
+      isMovable: false,
+      moves: [[0,0,0],[0,0,0],[0,0,0]],
+    }
     this.state = {
-      room: [],
-
+      // room: [],
+      roomInfo: {
+        a: { ...playerSchma },
+        b: { ...playerSchma },
+        s: [],
+        isPlaying: false,
+      },
     }
   }
 
@@ -27,6 +38,15 @@ export default class Room extends React.Component {
     }));
   }
 
+  getReady = _ => {
+    const { token, ws } = this.props;
+    ws.send(JSON.stringify({
+      event: "ready",
+      roomNum: 0,
+      token
+    }));
+  }
+
   render() {
     const { roomInfo } = this.state;
     const { userId, isLoading, roomNum } = this.props;
@@ -35,10 +55,14 @@ export default class Room extends React.Component {
       <> 
         <HeadAppBar title={`Room: ${roomNum != null ? roomNum + 1 : 0}`} callback={ () => this.exitRoom(roomNum)} />
         <View style={styles.container}>
-          { !!roomInfo.a && userId === roomInfo.a.id && <Paragraph style={styles.text}>You are X</Paragraph>}
-          { !!roomInfo.b && userId === roomInfo.b.id && <Paragraph style={styles.text}>You are O</Paragraph>}
-          <Paragraph style={styles.text}>{players.join(' VS ')}</Paragraph>
-          <Paragraph style={styles.text}>Spectator: {roomInfo.s.join(', ')}</Paragraph>
+          { !!roomInfo.a && userId === roomInfo.a.id && <Text style={styles.text}>You are the player using X.</Text>}
+          { !!roomInfo.b && userId === roomInfo.b.id && <Text style={styles.text}>You are the player using O.</Text>}
+          { !!roomInfo.s && roomInfo.s.filter(id => userId != id).length > 0 && (
+            <Text style={styles.text}>You are a spectator</Text>
+          )}
+          {/* <Paragraph style={styles.text}>{players.join(' VS ')}</Paragraph>
+          <Paragraph style={styles.text}>Spectator: {roomInfo.s.join(', ')}</Paragraph> */}
+          <Button onPress={this.getReady} type="outlined" style={styles.text}>Ready</Button>
         </View>
       </> 
     )
@@ -56,6 +80,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#003f5c',
   },
   text: {
+    minHeight: 50,
     color: "#fb5b5a",
     fontWeight: "bold",
     fontSize: 26,
